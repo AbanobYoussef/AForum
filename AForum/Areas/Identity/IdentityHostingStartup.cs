@@ -4,6 +4,7 @@ using AForum.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,8 +21,11 @@ namespace AForum.Areas.Identity
                     options.UseSqlServer(
                         context.Configuration.GetConnectionString("AForumContextConnection")));
 
-                services.AddDefaultIdentity<AForumUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                services.AddDefaultIdentity<AForumUser >(options => options.SignIn.RequireConfirmedAccount = true)
                     .AddEntityFrameworkStores<AForumContext>();
+
+
+
             });
         }
     }
