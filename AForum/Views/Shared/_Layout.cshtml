@@ -1,4 +1,15 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<AForum.Areas.Identity.Data.AForumUser> UserManager
+@inject SignInManager<AForum.Areas.Identity.Data.AForumUser> SignInManager
+@{
+    if (SignInManager.IsSignedIn(User))
+    {
+        var user = UserManager.FindByNameAsync(User.Identity.Name);
+    }
+}
+
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -9,23 +20,39 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AForum</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-dark  box-shadow mb-3 ">
+            <div id="navbar" class="navbar-collapse collapse ">
+                <div class="navbar-header Logo">
+                    <a class="navbar-brand navLogo" asp-controller="Home" asp-action="Index"></a>
                 </div>
+                <ul class="nav navbar-nav container">
+
+                    <li class="active"><a asp-controller="Forums" role="button" asp-action="Index">Forums</a></li>
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Settings<span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li role="separator" class="divider"></li>
+                                <li class="dropdown-header">Profile</li>
+                                <li><a asp-controller="Profile" asp-action="Detail" asp-route-id="@UserManager.GetUserId(User)">My Profile</a></li>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <li role="separator" class="divider"></li>
+                                    <li class="dropdown-header">Admin</li>
+                                    <li><a asp-controller="Forum" asp-action="Create">Create Forum</a></li>
+                                    <li><a asp-controller="Profile" asp-action="Index">Users</a></li>
+                                }
+                            </ul>
+                        </li>
+                    }
+                </ul>
+
+            </div><!--/.nav-collapse -->
+            <div class="nav-item" style="float:left">
+                @{
+                    Html.RenderPartial("_LoginPartial");
+                }
             </div>
         </nav>
     </header>
@@ -35,7 +62,7 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class=" footer text-muted">
         <div class="container">
             &copy; 2020 - AForum - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>

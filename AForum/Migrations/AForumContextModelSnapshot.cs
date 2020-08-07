@@ -38,11 +38,17 @@ namespace AForum.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTime>("MemberSince")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("NormalizedEmail")
                         .HasColumnType("nvarchar(256)")
@@ -60,6 +66,12 @@ namespace AForum.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("ProfileImage")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
@@ -84,7 +96,7 @@ namespace AForum.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
-            modelBuilder.Entity("AForum.Models.Forum", b =>
+            modelBuilder.Entity("AForum.Core.Entities.Forum", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -108,7 +120,7 @@ namespace AForum.Migrations
                     b.ToTable("Forums");
                 });
 
-            modelBuilder.Entity("AForum.Models.Post", b =>
+            modelBuilder.Entity("AForum.Core.Entities.Post", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -120,6 +132,9 @@ namespace AForum.Migrations
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
@@ -139,7 +154,7 @@ namespace AForum.Migrations
                     b.ToTable("Posts");
                 });
 
-            modelBuilder.Entity("AForum.Models.PostReply", b =>
+            modelBuilder.Entity("AForum.Core.Entities.PostReply", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -302,20 +317,20 @@ namespace AForum.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("AForum.Models.Post", b =>
+            modelBuilder.Entity("AForum.Core.Entities.Post", b =>
                 {
                     b.HasOne("AForum.Areas.Identity.Data.AForumUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
 
-                    b.HasOne("AForum.Models.Forum", "forum")
+                    b.HasOne("AForum.Core.Entities.Forum", "forum")
                         .WithMany("Posts")
                         .HasForeignKey("forumId");
                 });
 
-            modelBuilder.Entity("AForum.Models.PostReply", b =>
+            modelBuilder.Entity("AForum.Core.Entities.PostReply", b =>
                 {
-                    b.HasOne("AForum.Models.Post", "Post")
+                    b.HasOne("AForum.Core.Entities.Post", "Post")
                         .WithMany("Replies")
                         .HasForeignKey("PostId");
 

@@ -8,10 +8,10 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-
 [assembly: HostingStartup(typeof(AForum.Areas.Identity.IdentityHostingStartup))]
 namespace AForum.Areas.Identity
 {
+
     public class IdentityHostingStartup : IHostingStartup
     {
         public void Configure(IWebHostBuilder builder)

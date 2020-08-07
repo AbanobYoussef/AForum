@@ -6,32 +6,58 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using AForum.Models;
+using AForum.Core.Entities;
+using AForum.Core.Interfaces;
+using AForum.Models.Post;
+using AForum.Models.Home;
 
 namespace AForum.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly IPost _postService;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(IPost postService)
         {
-            _logger = logger;
+            _postService = postService;
         }
 
         public IActionResult Index()
         {
-            return View();
+            var model = BuildHomeIndexModel();
+            return View(model);
         }
 
-        public IActionResult Privacy()
+        public HomeIndexModel BuildHomeIndexModel()
         {
-            return View();
+            var latest = _postService.GetLatestPosts(10);
+
+            var posts = latest.Select(post => new PostListingModel
+            {
+                Id = post.Id,
+                Title = post.Title,
+                Author = post.User.UserName,
+                AuthorId = post.User.Id,
+                AuthorRating = post.User.Rating,
+                DatePosted = post.Created.ToString(),
+                RepliesCount = _postService.GetReplyCount(post.Id),
+                ForumName = post.forum.Title,
+                ForumImageUrl = _postService.GetForumImageUrl(post.Id),
+                ForumId = post.forum.Id
+            });
+
+            return new HomeIndexModel()
+            {
+                LatestPosts = posts
+            };
+
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+
+        [HttpPost]
+        public IActionResult Search(string searchQuery)
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return RedirectToAction("Topic", "Forums", new { searchQuery });
         }
     }
 }
