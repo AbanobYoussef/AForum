@@ -9,6 +9,7 @@ using AForum.Helpers;
 using AForum.Models.Post;
 using AForum.Models.Reply;
 using Core;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -34,9 +35,7 @@ namespace AForum.Controllers
 
         public IActionResult Index(int id)
         {
-
             var post = _postService.GetById(id);
-
             var replies = GetPostReplies(post).OrderBy(reply => reply.Date);
 
             var model = new PostIndexModel
@@ -47,8 +46,9 @@ namespace AForum.Controllers
                 AuthorName = post.User.UserName,
                 AuthorImageUrl = post.User.ProfileImage,
                 AuthorRating = post.User.Rating,
+                IsAuthorAdmin = IsAuthorAdmin(post.User),
                 Date = post.Created,
-                PostContent = post.Content,
+                PostContent = _postFormatter.Prettify(post.Content),
                 Replies = replies,
                 ForumId = post.forum.Id,
                 ForumName = post.forum.Title
@@ -69,12 +69,19 @@ namespace AForum.Controllers
                 AuthorImageUrl = reply.User.ProfileImage,
                 AuthorRating = reply.User.Rating,
                 Date = reply.Created,
+                ReplyContent = _postFormatter.Prettify(reply.Content),
+                IsAuthorAdmin = IsAuthorAdmin(reply.User)
             });
+        }
+
+        public static bool IsAuthorAdmin(AForumUser user)
+        {
+            return _userManager.GetRolesAsync(user)
+                .Result.Contains("Admin");
         }
 
         public IActionResult Create(int id)
         {
-            
             // note id here is Forum.Id
             var forum = _forumService.GetById(id);
 
@@ -89,20 +96,18 @@ namespace AForum.Controllers
             return View(model);
         }
 
-
         [HttpPost]
         public async Task<IActionResult> AddPost(NewPostModel model)
         {
             var userId = _userManager.GetUserId(User);
-            var user =  _userManager.FindByIdAsync(userId).Result;
+            var user = await _userManager.FindByIdAsync(userId);
             var post = BuildPost(model, user);
 
             await _postService.Add(post);
             await _userService.BumpRating(userId, typeof(Post));
 
-            return RedirectToAction("Index", "Forum", new { id = model.ForumId });
+            return RedirectToAction("Index", "Forum", model.ForumId);
         }
-
 
         public Post BuildPost(NewPostModel post, AForumUser user)
         {
@@ -118,6 +123,42 @@ namespace AForum.Controllers
                 User = user,
                 IsArchived = false
             };
+        }
+
+        public IActionResult Edit(int postId)
+        {
+            var post = _postService.GetById(postId);
+
+            var model = new NewPostModel
+            {
+                Title = post.Title,
+                Content = post.Content,
+                Created = post.Created,
+            };
+
+            return View(model);
+        }
+
+        public IActionResult Delete(int id)
+        {
+            var post = _postService.GetById(id);
+            var model = new DeletePostModel
+            {
+                PostId = post.Id,
+                PostAuthor = post.User.UserName,
+                PostContent = post.Content
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public IActionResult ConfirmDelete(int id)
+        {
+            var post = _postService.GetById(id);
+            _postService.Delete(id);
+
+            return RedirectToAction("Index", "Forum", new { id = post.forum.Id });
         }
     }
 }

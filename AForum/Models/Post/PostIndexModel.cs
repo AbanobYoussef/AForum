@@ -21,5 +21,7 @@ namespace AForum.Models.Post
         public string ForumName { get; set; }
 
         public IEnumerable<PostReplyModel> Replies { get; set; }
+
+        
     }
 }

@@ -46,9 +46,10 @@ namespace AForum.Areas.Identity.Pages.Account
 
         public class InputModel
         {
+
             [Required]
-            [EmailAddress]
-            public string Email { get; set; }
+            [Display(Name = "User Name")]
+            public string UserName { get; set; }
 
             [Required]
             [DataType(DataType.Password)]
@@ -83,7 +84,7 @@ namespace AForum.Areas.Identity.Pages.Account
             {
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: true);
+                var result = await _signInManager.PasswordSignInAsync(Input.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: true);
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");
@@ -111,18 +112,18 @@ namespace AForum.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnPostSendVerificationEmailAsync()
         {
+
             if (!ModelState.IsValid)
             {
                 return Page();
             }
-
-            var user = await _userManager.FindByEmailAsync(Input.Email);
+            var userId = _userManager.GetUserId(User);
+            var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
                 ModelState.AddModelError(string.Empty, "Verification email sent. Please check your email.");
             }
 
-            var userId = await _userManager.GetUserIdAsync(user);
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var callbackUrl = Url.Page(
                 "/Account/ConfirmEmail",
@@ -130,7 +131,7 @@ namespace AForum.Areas.Identity.Pages.Account
                 values: new { userId = userId, code = code },
                 protocol: Request.Scheme);
             await _emailSender.SendEmailAsync(
-                Input.Email,
+                user.Email,
                 "Confirm your email",
                 $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 

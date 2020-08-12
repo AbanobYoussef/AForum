@@ -20,6 +20,8 @@ namespace AForum.Interfaces
 
         public async Task Add(AForumUser user)
         {
+
+            _context.Add(user);
             _context.Add(user);
             await _context.SaveChangesAsync();
         }

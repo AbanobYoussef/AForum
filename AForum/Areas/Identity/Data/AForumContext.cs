@@ -12,8 +12,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AForum.Data
 {
+    
     public class AForumContext : IdentityDbContext<AForumUser>
     {
+        
         public AForumContext(DbContextOptions<AForumContext> options)
             : base(options)
         {

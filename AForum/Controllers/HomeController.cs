@@ -10,20 +10,24 @@ using AForum.Core.Entities;
 using AForum.Core.Interfaces;
 using AForum.Models.Post;
 using AForum.Models.Home;
+using AForum.Data;
 
 namespace AForum.Controllers
 {
     public class HomeController : Controller
     {
         private readonly IPost _postService;
+        private readonly AForumContext _context;
 
-        public HomeController(IPost postService)
+        public HomeController(IPost postService , AForumContext context)
         {
             _postService = postService;
+            _context = context;
         }
 
         public IActionResult Index()
         {
+
             var model = BuildHomeIndexModel();
             return View(model);
         }
